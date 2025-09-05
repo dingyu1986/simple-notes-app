@@ -1,14 +1,9 @@
-// import './style.css';
 import Modal from '../Modal';
 import { useState } from 'react';
 
 function NoteList({ notes, loading, onDelete, onPatch }) {
   const [openNoteId, setOpenNoteId] = useState(null);
   const currentNote = notes.find((note) => note.id === openNoteId) || {};
-
-  if (!loading && notes.length === 0) {
-    return <div className="empty-state">暂无笔记，请添加新笔记</div>;
-  }
 
   return (
     <div className="noteList">

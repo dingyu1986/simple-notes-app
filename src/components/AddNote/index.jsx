@@ -1,5 +1,4 @@
 import { useState } from 'react';
-// import './style.css';
 
 function AddNote({ onSubmit }) {
   const [title, setTitle] = useState('');

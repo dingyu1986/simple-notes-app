@@ -1,5 +1,3 @@
-// import './style.css';
-
 function Pagination({ currentPage, totalPages, getNotes, searchTerm }) {
   function handlePrevPage() {
     if (currentPage > 1) {

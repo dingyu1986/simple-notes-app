@@ -1,5 +1,3 @@
-// import './style.css';
-
 function SearchNote({ searchTerm, onChange }) {
   return (
     <div className="search">
