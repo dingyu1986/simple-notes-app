@@ -3,6 +3,7 @@ import './App.css';
 import SearchNote from './components/SearchNote';
 import NoteList from './components/NoteList';
 import AddNote from './components/AddNote';
+import Pagination from './components/Pagination';
 
 function App() {
   const [notes, setNotes] = useState([]);
@@ -40,27 +41,6 @@ function App() {
     setSearchTerm(term);
     getNotes(1, term);
   }
-
-  // 上一页
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      getNotes(currentPage - 1, searchTerm);
-    }
-  };
-
-  // 下一页
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      getNotes(currentPage + 1, searchTerm);
-    }
-  };
-
-  // 跳转到指定页
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages && page !== currentPage) {
-      getNotes(page, searchTerm);
-    }
-  };
 
   async function handleAdd(note) {
     const res = await fetch('http://localhost:8080/notes', {
@@ -106,48 +86,18 @@ function App() {
       <div>
         <h1>我的笔记本</h1>
         <SearchNote searchTerm={searchTerm} onChange={handleSearch} />
-        {loading ? (
-          <div className="loading">加载中...</div>
-        ) : (
-          <>
-            <NoteList
-              notes={notes}
-              onDelete={handleDelete}
-              onPatch={handlePatch}
-            />
-            <div className="pagination">
-              <button
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-                className="pagination-button"
-              >
-                上一页
-              </button>
-              <div className="page-numbers">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`page-number ${
-                        currentPage === page ? 'active' : ''
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  )
-                )}
-              </div>
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-                className="pagination-button"
-              >
-                下一页
-              </button>
-            </div>
-          </>
-        )}
+        <NoteList
+          notes={notes}
+          loading={loading}
+          onDelete={handleDelete}
+          onPatch={handlePatch}
+        />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          getNotes={getNotes}
+          searchTerm={searchTerm}
+        />
         <AddNote onSubmit={handleAdd} />
       </div>
     </main>
