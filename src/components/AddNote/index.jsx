@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function AddNote({ onSubmit }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    setError('');
+  }, [title, content]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -11,7 +15,6 @@ function AddNote({ onSubmit }) {
       setError('*标题和内容不能为空');
       return;
     }
-    setError('');
     onSubmit({ title, content });
     setTitle('');
     setContent('');
