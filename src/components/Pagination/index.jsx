@@ -1,25 +1,36 @@
-import './style.css';
+// import './style.css';
 
 function Pagination({ currentPage, totalPages, getNotes, searchTerm }) {
-  const handlePrevPage = () => {
+  function handlePrevPage() {
     if (currentPage > 1) {
       getNotes(currentPage - 1, searchTerm);
     }
-  };
+  }
 
   // 下一页
-  const handleNextPage = () => {
+  function handleNextPage() {
     if (currentPage < totalPages) {
       getNotes(currentPage + 1, searchTerm);
     }
-  };
+  }
 
   // 跳转到指定页
-  const handlePageChange = (page) => {
+  function handlePageChange(page) {
     if (page >= 1 && page <= totalPages && page !== currentPage) {
       getNotes(page, searchTerm);
     }
-  };
+  }
+
+  function getPageRange() {
+    const range = [];
+    const start = Math.max(1, currentPage - 2);
+    const end = Math.min(totalPages, currentPage + 2);
+    for (let i = start; i <= end; i++) {
+      range.push(i);
+    }
+    return range;
+  }
+
   return (
     <div className="pagination">
       <button
@@ -30,7 +41,7 @@ function Pagination({ currentPage, totalPages, getNotes, searchTerm }) {
         上一页
       </button>
       <div className="page-numbers">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        {getPageRange().map((page) => (
           <button
             key={page}
             onClick={() => handlePageChange(page)}

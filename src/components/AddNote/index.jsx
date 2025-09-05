@@ -1,17 +1,18 @@
-import React from 'react';
 import { useState } from 'react';
-import './style.css';
+// import './style.css';
 
 function AddNote({ onSubmit }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [error, setError] = useState('');
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!title.trim() || !content.trim()) {
-      alert('标题和内容不能为空');
+      setError('*标题和内容不能为空');
       return;
     }
+    setError('');
     onSubmit({ title, content });
     setTitle('');
     setContent('');
@@ -21,6 +22,7 @@ function AddNote({ onSubmit }) {
     <div className="addNote">
       <h2>添加新笔记</h2>
       <form onSubmit={handleSubmit}>
+        {error && <div className="error-message">{error}</div>}
         <input
           type="text"
           placeholder="请输入笔记标题"

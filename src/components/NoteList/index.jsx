@@ -1,9 +1,14 @@
-import './style.css';
+// import './style.css';
 import Modal from '../Modal';
 import { useState } from 'react';
 
 function NoteList({ notes, loading, onDelete, onPatch }) {
   const [openNoteId, setOpenNoteId] = useState(null);
+  const currentNote = notes.find((note) => note.id === openNoteId) || {};
+
+  if (!loading && notes.length === 0) {
+    return <div className="empty-state">暂无笔记，请添加新笔记</div>;
+  }
 
   return (
     <div className="noteList">
@@ -15,16 +20,7 @@ function NoteList({ notes, loading, onDelete, onPatch }) {
             <h2>
               {note.title}
               <div>
-                <button onClick={() => setOpenNoteId(note.id)}>修改</button>
-                <Modal
-                  show={openNoteId === note.id}
-                  note={note}
-                  onClose={() => setOpenNoteId(null)}
-                  onSubmit={({ title, content }) => {
-                    onPatch({ title, content, id: note.id });
-                    setOpenNoteId(null);
-                  }}
-                />{' '}
+                <button onClick={() => setOpenNoteId(note.id)}>修改</button>{' '}
                 <button onClick={() => onDelete(note.id)}>删除</button>
               </div>
             </h2>
@@ -34,6 +30,15 @@ function NoteList({ notes, loading, onDelete, onPatch }) {
           </div>
         ))
       )}
+      <Modal
+        show={!!openNoteId}
+        note={currentNote}
+        onClose={() => setOpenNoteId(null)}
+        onSubmit={({ title, content }) => {
+          onPatch({ title, content, id: openNoteId });
+          setOpenNoteId(null);
+        }}
+      />
     </div>
   );
 }

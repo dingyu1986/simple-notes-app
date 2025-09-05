@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import './style.css';
+import React, { useState, useEffect } from 'react';
+// import './style.css';
 
 function Modal({ show, onClose, onSubmit, note }) {
   const [title, setTitle] = useState(note.title || '');
   const [content, setContent] = useState(note.content || '');
+
+  useEffect(() => {
+    setTitle(note.title || '');
+    setContent(note.content || '');
+  }, [note]);
 
   const handleSubmit = () => {
     onSubmit({ title, content });
