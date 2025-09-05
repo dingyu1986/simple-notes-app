@@ -5,6 +5,7 @@ import SearchNote from './components/SearchNote';
 import NoteList from './components/NoteList';
 import AddNote from './components/AddNote';
 import Pagination from './components/Pagination';
+import request from './utils/request';
 
 const debounce = (func, delay) => {
   let timer;
@@ -21,25 +22,68 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+
   const pageSize = 3;
 
   function constructUrl(page, term) {
-    let url = `http://localhost:8080/notes?page=${page}&pageSize=${pageSize}`;
+    let url = `/api/notes?page=${page}&pageSize=${pageSize}`;
     if (term) url += `&term=${encodeURIComponent(term)}`;
     return url;
+  }
+
+  async function handleAdd(note) {
+    setIsProcessing(true);
+    try {
+      const data = await request('/api/notes', 'POST', note);
+      setNotes([data, ...notes]);
+      getNotes(1, searchTerm);
+    } catch (err) {
+      console.error('添加笔记出错', err);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function handleDelete(id) {
+    setIsProcessing(true);
+    try {
+      await request(`/api/notes/${id}`, 'DELETE');
+      setNotes(notes.filter((note) => note.id !== id));
+      // 删除后重新加载当前页
+      getNotes(currentPage, searchTerm);
+    } catch (err) {
+      console.log('删除笔记出错', err);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function handlePatch({ title, content, id }) {
+    setIsProcessing(true);
+    try {
+      const data = await request(`/api/notes/${id}`, 'PATCH', {
+        title,
+        content,
+      });
+      setNotes(notes.map((note) => (note.id === id ? data : note)));
+    } catch (err) {
+      console.log('更新笔记出错', err);
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   const getNotes = useCallback(
     async (page = 1, term = searchTerm) => {
       setLoading(true);
+
       try {
-        const res = await fetch(constructUrl(page, term));
-        const data = await res.json();
+        const data = await request(constructUrl(page, term));
         setNotes(data.data);
         setTotalPages(data.pagination.totalPages);
         setCurrentPage(data.pagination.currentPage);
-      } catch (error) {
-        console.error('加载笔记列表出错', error);
+      } catch (err) {
+        console.error('加载笔记列表出错', err);
       } finally {
         setLoading(false);
       }
@@ -48,7 +92,11 @@ function App() {
   );
 
   useEffect(() => {
-    getNotes();
+    const controller = new AbortController();
+    getNotes(null, null, controller);
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   // 搜索时防抖
@@ -63,55 +111,6 @@ function App() {
     const term = e.target.value;
     setSearchTerm(term);
     debouncedSearch(term);
-  }
-
-  async function handleAdd(note) {
-    setIsProcessing(true);
-    try {
-      const res = await fetch('http://localhost:8080/notes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(note),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setNotes([data, ...notes]);
-        // 添加后重新加载第一页
-        getNotes(1, searchTerm);
-      }
-    } finally {
-      setIsProcessing(false);
-    }
-  }
-
-  async function handleDelete(id) {
-    setIsProcessing(true);
-    try {
-      const res = await fetch(`http://localhost:8080/notes/${id}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        setNotes(notes.filter((note) => note.id !== id));
-        // 删除后重新加载当前页
-        getNotes(currentPage, searchTerm);
-      }
-    } finally {
-      setIsProcessing(false);
-    }
-  }
-
-  async function handlePatch({ title, content, id }) {
-    const res = await fetch(`http://localhost:8080/notes/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title, content }),
-    });
-    const data = await res.json();
-    setNotes(notes.map((note) => (note.id === id ? data : note)));
   }
 
   return (

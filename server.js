@@ -27,7 +27,7 @@ const notes = [
 
 // enable CORS
 app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', 'http://localhost');
   res.header(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept, Authorization'
@@ -78,9 +78,9 @@ app.delete('/notes/:id', (req, res) => {
   const index = notes.findIndex((note) => note.id === id);
   if (index !== -1) {
     notes.splice(index, 1);
-    res.status(200).json({ message: '删除成功' });
+    res.status(201).json({ message: '删除成功' });
   } else {
-    res.status(404).json({ message: '笔记不存在' });
+    res.status(401).json({ message: '笔记不存在' });
   }
 });
 
@@ -90,7 +90,9 @@ app.patch('/notes/:id', (req, res) => {
   if (index !== -1) {
     const updatedNote = { ...notes[index], ...req.body };
     notes[index] = updatedNote;
-    res.json(updatedNote);
+    res.status(202).json(updatedNote);
+  } else {
+    res.status(402).json({ message: '笔记不存在' });
   }
 });
 
